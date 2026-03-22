@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neuro Spelling Bee</title>
+  <style>
+    :root {
+      --bg: #f7f6f3;
+      --text: #222;
+      --muted: #666;
+      --yellow: #f7da21;
+      --yellow-dark: #e4c600;
+      --gray-hex: #e6e6e6;
+      --gray-btn: #d9d9d9;
+      --gray-btn-hover: #c9c9c9;
+      --good: #177245;
+      --bad: #b42318;
+      --card: #ffffff;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 820px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 18px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .goal {
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #444;
+    }
+
+    .bee-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0 20px;
+    }
+
+    .hive {
+      position: relative;
+      width: 320px;
+      height: 280px;
+    }
+
+    .hex {
+      position: absolute;
+      width: 90px;
+      height: 104px;
+      clip-path: polygon(
+        50% 0%,
+        93% 25%,
+        93% 75%,
+        50% 100%,
+        7% 75%,
+        7% 25%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+      user-select: none;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+
+    .hex:hover {
+      transform: scale(1.04);
+    }
+
+    .outer {
+      background: var(--gray-hex);
+    }
+
+    .center {
+      background: var(--yellow);
+    }
+
+    .hex.center:hover {
+      background: var(--yellow-dark);
+    }
+
+    .pos-center { top: 88px; left: 115px; }
+    .pos-top    { top: 0px; left: 115px; }
+    .pos-tr     { top: 44px; left: 195px; }
+    .pos-br     { top: 132px; left: 195px; }
+    .pos-bottom { top: 176px; left: 115px; }
+    .pos-bl     { top: 132px; left: 35px; }
+    .pos-tl     { top: 44px; left: 35px; }
+
+    .entry-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .current-word {
+      min-height: 52px;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 8px 12px;
+      border-bottom: 2px solid #ddd;
+      width: min(100%, 420px);
+    }
+
+    .message {
+      min-height: 24px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .message.good {
+      color: var(--good);
+      font-weight: 600;
+    }
+
+    .message.bad {
+      color: var(--bad);
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--gray-btn);
+      transition: background 0.15s ease, transform 0.08s ease;
+    }
+
+    button:hover {
+      background: var(--gray-btn-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .primary {
+      background: var(--yellow);
+    }
+
+    .primary:hover {
+      background: var(--yellow-dark);
+    }
+
+    .success-box {
+      display: none;
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 14px;
+      background: #eefaf2;
+      border: 1px solid #cfe9d8;
+      text-align: center;
+    }
+
+    .success-box.show {
+      display: block;
+    }
+
+    .success-box h2 {
+      margin: 0 0 8px;
+      color: var(--good);
+    }
+
+    .success-word {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      margin-top: 8px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .hive {
+        transform: scale(0.78);
+        transform-origin: top center;
+        height: 235px;
+      }
+
+      .current-word {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <h1>Neuro Spelling Bee</h1>
+      <div class="subtitle">
+        Build the single correct neuro word using the hive letters.<br>
+        Letters can be reused. The centre letter is required.
+      </div>
+
+      <div class="goal">Find the pangram.</div>
+
+      <div class="bee-wrap">
+        <div class="hive" id="hive">
+          <div class="hex outer pos-top" data-letter=""></div>
+          <div class="hex outer pos-tr" data-letter=""></div>
+          <div class="hex outer pos-br" data-letter=""></div>
+          <div class="hex outer pos-bottom" data-letter=""></div>
+          <div class="hex outer pos-bl" data-letter=""></div>
+          <div class="hex outer pos-tl" data-letter=""></div>
+          <div class="hex center pos-center" data-letter=""></div>
+        </div>
+      </div>
+
+      <div class="entry-area">
+        <div class="current-word" id="currentWord"></div>
+        <div class="message" id="message">Use the letters to find the hidden word.</div>
+      </div>
+
+      <div class="controls">
+        <button id="deleteBtn">Delete</button>
+        <button id="shuffleBtn">Shuffle</button>
+        <button class="primary" id="enterBtn">Enter</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+
+      <div class="success-box" id="successBox">
+        <h2>Queen Bee!</h2>
+        <div>You found the word:</div>
+        <div class="success-word" id="successWord"></div>
+      </div>
+
+      <div class="footer-note">
+        Neuro-themed custom Spelling Bee
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*********************************************************
+     * CUSTOMISE HERE
+     *********************************************************/
+    const ANSWER = "thalamus";
+    const CENTER_LETTER = "a";
+    const OUTER_LETTERS = ["t", "h", "s", "l", "m", "u"];
+
+    /*********************************************************
+     * STATE
+     *********************************************************/
+    const allowedLetters = new Set([CENTER_LETTER, ...OUTER_LETTERS]);
+    let currentWord = "";
+    let solved = false;
+
+    const hive = document.getElementById("hive");
+    const currentWordEl = document.getElementById("currentWord");
+    const messageEl = document.getElementById("message");
+    const successBoxEl = document.getElementById("successBox");
+    const successWordEl = document.getElementById("successWord");
+
+    const deleteBtn = document.getElementById("deleteBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const enterBtn = document.getElementById("enterBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    /*********************************************************
+     * HELPERS
+     *********************************************************/
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function renderHive() {
+      const outerHexes = hive.querySelectorAll(".hex.outer");
+      const centerHex = hive.querySelector(".hex.center");
+      const shuffled = shuffleArray(OUTER_LETTERS);
+
+      outerHexes.forEach((hex, idx) => {
+        hex.textContent = shuffled[idx].toUpperCase();
+        hex.dataset.letter = shuffled[idx];
+      });
+
+      centerHex.textContent = CENTER_LETTER.toUpperCase();
+      centerHex.dataset.letter = CENTER_LETTER;
+    }
+
+    function updateCurrentWord() {
+      currentWordEl.textContent = currentWord.toUpperCase();
+    }
+
+    function setMessage(text, type = "") {
+      messageEl.textContent = text;
+      messageEl.className = "message";
+      if (type) messageEl.classList.add(type);
+    }
+
+    function addLetter(letter) {
+      if (solved) return;
+      currentWord += letter;
+      updateCurrentWord();
+      setMessage("Keep going...");
+    }
+
+    function deleteLetter() {
+      if (solved) return;
+      currentWord = currentWord.slice(0, -1);
+      updateCurrentWord();
+    }
+
+    function resetGame() {
+      currentWord = "";
+      solved = false;
+      updateCurrentWord();
+      successBoxEl.classList.remove("show");
+      setMessage("Use the letters to find the hidden word.");
+      renderHive();
+    }
+
+    /*********************************************************
+     * SUBMIT LOGIC
+     *********************************************************/
+    function submitWord() {
+      if (solved) return;
+
+      const word = currentWord.toLowerCase();
+
+      if (!word) {
+        setMessage("Type a word first.", "bad");
+        return;
+      }
+
+      if (word.length < 4) {
+        setMessage("Too short.", "bad");
+        return;
+      }
+
+      if (!word.includes(CENTER_LETTER)) {
+        setMessage(`The word must include ${CENTER_LETTER.toUpperCase()}.`, "bad");
+        return;
+      }
+
+      if (![...word].every(ch => allowedLetters.has(ch))) {
+        setMessage("That uses letters outside the hive.", "bad");
+        return;
+      }
+
+      if (word !== ANSWER) {
+        setMessage("Not quite — try again.", "bad");
+        return;
+      }
+
+      solved = true;
+      setMessage("Correct!", "good");
+      successWordEl.textContent = ANSWER.toUpperCase();
+      successBoxEl.classList.add("show");
+    }
+
+    /*********************************************************
+     * EVENTS
+     *********************************************************/
+    hive.addEventListener("click", (e) => {
+      const hex = e.target.closest(".hex");
+      if (!hex) return;
+      addLetter(hex.dataset.letter);
+    });
+
+    deleteBtn.addEventListener("click", deleteLetter);
+    shuffleBtn.addEventListener("click", renderHive);
+    enterBtn.addEventListener("click", submitWord);
+    resetBtn.addEventListener("click", resetGame);
+
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+
+      if (key === "enter") {
+        submitWord();
+        return;
+      }
+
+      if (key === "backspace") {
+        deleteLetter();
+        return;
+      }
+
+      if (allowedLetters.has(key)) {
+        addLetter(key);
+      }
+    });
+
+    /*********************************************************
+     * INIT
+     *********************************************************/
+    renderHive();
+    updateCurrentWord();
+  </script>
+</body>
+</html>
